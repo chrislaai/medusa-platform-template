@@ -1,0 +1,12 @@
+.env
+.DS_Store
+node_modules
+*.key
+*.pem
+*.prod
+*.local
+.next
+build
+uploads
+dist
+*.log
