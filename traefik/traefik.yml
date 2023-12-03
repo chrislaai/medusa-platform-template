@@ -1,0 +1,4 @@
+tls:
+  certificates:
+    - certFile: /certs/example.com.pem
+      keyFile: /certs/example.com.key
