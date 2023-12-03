@@ -1,0 +1,4 @@
+[submodule "apps/storefront"]
+	path = apps/storefront
+	url = https://github.com/chrislaai/nextjs-starter-medusa.git
+	branch = main
