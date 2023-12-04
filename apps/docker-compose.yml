@@ -1,0 +1,98 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - 9000:9000
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.backend.rule=Host(`${BACKEND_DOMAIN}`)
+      - traefik.http.routers.backend.entrypoints=websecure
+      - traefik.http.routers.backend.service=backend
+      - traefik.http.routers.backend.tls=true
+      - traefik.http.services.backend.loadbalancer.server.port=9000
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - ADMIN_CORS=${ADMIN_CORS}
+      - STORE_CORS=${STORE_CORS}
+      - JWT_SECRET=${JWT_SECRET}
+      - COOKIE_SECRET=${COOKIE_SECRET}
+      - MEDUSA_FF_PRODUCT_CATEGORIES=true
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_PRIVATE_BUCKET=${MINIO_PRIVATE_BUCKET}
+      - MEILISEARCH_HOST=${MEILISEARCH_HOST}
+      - MEILISEARCH_API_KEY=${MEILISEARCH_API_KEY}
+      - PAYPAL_SANDBOX=${PAYPAL_SANDBOX}
+      - PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID}
+      - PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET}
+      - PAYPAL_AUTH_WEBHOOK_ID=${PAYPAL_AUTH_WEBHOOK_ID}
+      - STRIPE_API_KEY=${STRIPE_API_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - NODE_ENV=production
+    volumes:
+      - backend:/app/backend
+      - /app/backend/node_modules
+    networks:
+      - traefik
+      - medusa
+
+  storefront:
+    build:
+      context: ./storefront
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_MEDUSA_BACKEND_URL=${NEXT_PUBLIC_MEDUSA_BACKEND_URL}
+        - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
+        - NEXT_PUBLIC_STRIPE_KEY=${NEXT_PUBLIC_STRIPE_KEY}
+        - NEXT_PUBLIC_PAYPAL_CLIENT_ID=${NEXT_PUBLIC_PAYPAL_CLIENT_ID}
+        - NEXT_PUBLIC_SEARCH_ENDPOINT=${NEXT_PUBLIC_SEARCH_ENDPOINT}
+        - NEXT_PUBLIC_SEARCH_API_KEY=${NEXT_PUBLIC_SEARCH_API_KEY}
+        - NEXT_PUBLIC_INDEX_NAME=${NEXT_PUBLIC_INDEX_NAME}
+        - REVALIDATE_SECRET=${REVALIDATE_SECRET}
+    ports:
+      - 8000:8000
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.storefront.rule=Host(`${STOREFRONT_DOMAIN}`)
+      - traefik.http.routers.storefront.entrypoints=websecure
+      - traefik.http.routers.storefront.service=storefront
+      - traefik.http.routers.storefront.tls=true
+      - traefik.http.services.storefront.loadbalancer.server.port=8000
+    environment:
+      - NEXT_PUBLIC_MEDUSA_BACKEND_URL=${NEXT_PUBLIC_MEDUSA_BACKEND_URL}
+      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
+      - NEXT_PUBLIC_STRIPE_KEY=${NEXT_PUBLIC_STRIPE_KEY}
+      - NEXT_PUBLIC_PAYPAL_CLIENT_ID=${NEXT_PUBLIC_PAYPAL_CLIENT_ID}
+      - NEXT_PUBLIC_SEARCH_ENDPOINT=${NEXT_PUBLIC_SEARCH_ENDPOINT}
+      - NEXT_PUBLIC_SEARCH_API_KEY=${NEXT_PUBLIC_SEARCH_API_KEY}
+      - NEXT_PUBLIC_INDEX_NAME=${NEXT_PUBLIC_INDEX_NAME}
+      - REVALIDATE_SECRET=${REVALIDATE_SECRET}
+      - NODE_ENV=production
+    volumes:
+      - storefront:/app/storefront
+      - /app/storefront/node_modules
+    networks:
+      - traefik
+
+volumes:
+  backend:
+  storefront:
+
+networks:
+  traefik:
+    name: traefik
+    external: true
+  medusa:
+    name: medusa
+    external: true
