@@ -8,14 +8,6 @@ services:
     ports:
       - 9000:9000
     restart: unless-stopped
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=traefik
-      - traefik.http.routers.backend.rule=Host(`${BACKEND_DOMAIN}`)
-      - traefik.http.routers.backend.entrypoints=websecure
-      - traefik.http.routers.backend.service=backend
-      - traefik.http.routers.backend.tls=true
-      - traefik.http.services.backend.loadbalancer.server.port=9000
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - REDIS_URL=${REDIS_URL}
@@ -42,7 +34,6 @@ services:
       - backend:/app/backend
       - /app/backend/node_modules
     networks:
-      - traefik
       - medusa
 
   storefront:
@@ -61,14 +52,6 @@ services:
     ports:
       - 8000:8000
     restart: unless-stopped
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=traefik
-      - traefik.http.routers.storefront.rule=Host(`${STOREFRONT_DOMAIN}`)
-      - traefik.http.routers.storefront.entrypoints=websecure
-      - traefik.http.routers.storefront.service=storefront
-      - traefik.http.routers.storefront.tls=true
-      - traefik.http.services.storefront.loadbalancer.server.port=8000
     environment:
       - NEXT_PUBLIC_MEDUSA_BACKEND_URL=${NEXT_PUBLIC_MEDUSA_BACKEND_URL}
       - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
@@ -83,16 +66,13 @@ services:
       - storefront:/app/storefront
       - /app/storefront/node_modules
     networks:
-      - traefik
+      - medusa
 
 volumes:
   backend:
   storefront:
 
 networks:
-  traefik:
-    name: traefik
-    external: true
   medusa:
     name: medusa
     external: true

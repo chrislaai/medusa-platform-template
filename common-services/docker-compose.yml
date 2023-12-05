@@ -1,50 +1,18 @@
 version: "3.8"
 
 services:
-  traefik:
-    image: traefik:latest
+  nginx:
+    image: nginx:1.24.0-alpine
+    restart: unless-stopped
     ports:
       - 80:80
       - 443:443
-    restart: unless-stopped
-    command:
-      # File provider
-      - --providers.file.directory=/traefik
-      - --providers.file.watch=true
-      # Logs
-      - --log.filePath=/var/log/traefik/traefik.log
-      - --log.level=INFO
-      # Access Logs
-      - --accesslog=true
-      - --accesslog.filepath=/var/log/traefik/access.log
-      # API
-      - --api=true
-      - --api.dashboard=true
-      # Docker
-      - --providers.docker=true
-      - --providers.docker.endpoint=unix:///var/run/docker.sock
-      - --providers.docker.exposedbydefault=false
-      - --providers.docker.network=traefik
-      # HTTPS redirection (80 to 443)
-      - --entrypoints.web.address=:80
-      - --entrypoints.web.http.redirections.entryPoint.to=websecure
-      - --entrypoints.web.http.redirections.entryPoint.scheme=https
-      - --entrypoints.websecure.address=:443
-    labels:
-      - traefik.http.routers.traefik.rule=Host(`${TRAEFIK_DOMAIN}`)
-      - traefik.http.routers.traefik.service=api@internal
-      - traefik.http.routers.traefik.middlewares=auth
-      - traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH_USER_PASSWORD_HASH}
-      - traefik.enable=true
-      - traefik.http.routers.traefik.entrypoints=websecure
-      - traefik.http.routers.traefik.tls=true
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./traefik/log:/var/log/traefik
-      - ./traefik:/traefik
-      - ./certs:/certs
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/log:/var/log/nginx
+      - ./certs:/etc/ssl
     networks:
-      - traefik
+      - medusa
 
   minio:
     image: minio/minio:latest
@@ -53,21 +21,6 @@ services:
       - 9002:9002
     restart: unless-stopped
     command: server /data --console-address :9002 --address :9001
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=traefik
-      # API
-      - traefik.http.routers.minio.rule=Host(`${MINIO_DOMAIN}`)
-      - traefik.http.routers.minio.entrypoints=websecure
-      - traefik.http.routers.minio.service=minio
-      - traefik.http.routers.minio.tls=true
-      - traefik.http.services.minio.loadbalancer.server.port=9001
-      # Console
-      - traefik.http.routers.minio-console.rule=Host(`${MINIO_CONSOLE_DOMAIN}`)
-      - traefik.http.routers.minio-console.entrypoints=websecure
-      - traefik.http.routers.minio-console.service=minio-console
-      - traefik.http.routers.minio-console.tls=true
-      - traefik.http.services.minio-console.loadbalancer.server.port=9002
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
@@ -77,28 +30,20 @@ services:
     volumes:
       - minio:/data
     networks:
-      - traefik
+      - medusa
 
   meili:
     image: getmeili/meilisearch:v1.5
     ports:
       - 7700:7700
     restart: unless-stopped
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=traefik
-      - traefik.http.routers.meili.rule=Host(`${MEILI_DOMAIN}`)
-      - traefik.http.routers.meili.entrypoints=websecure
-      - traefik.http.routers.meili.service=meili
-      - traefik.http.routers.meili.tls=true
-      - traefik.http.services.meili.loadbalancer.server.port=7700
     environment:
       - MEILI_MASTER_KEY=${MEILI_MASTER_KEY}
       - MEILI_ENV=production
     volumes:
       - meili:/meili_data
     networks:
-      - traefik
+      - medusa
 
   postgres:
     image: postgres:13-alpine
@@ -131,9 +76,6 @@ volumes:
   redis:
 
 networks:
-  traefik:
-    name: traefik
-    external: true
   medusa:
     name: medusa
     external: true
