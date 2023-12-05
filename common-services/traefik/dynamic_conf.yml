@@ -1,0 +1,29 @@
+tls:
+  certificates:
+    - certFile: /certs/example.com.pem
+      keyFile: /certs/example.com.key
+
+# http:
+#   routers:
+#     backend:
+#       rule: "Host(`app.example.com`)"
+#       service: backend
+#       entryPoints:
+#         - websecure
+#       tls: true
+#     storefront:
+#       rule: "Host(`demo.example.com`)"
+#       service: storefront
+#       entryPoints:
+#         - websecure
+#       tls: true
+
+#   services:
+#     backend:
+#       loadBalancer:
+#         servers:
+#           - url: "http://<backend-service-ip-address>:<backend-service-port>"
+#     storefront:
+#       loadBalancer:
+#         servers:
+#           - url: "http://<storefront-service-ip-address>:<storefront-service-port>"
