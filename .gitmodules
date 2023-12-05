@@ -1,0 +1,8 @@
+[submodule "apps/backend"]
+	path = apps/backend
+	url = https://github.com/chrislaai/medusa-starter-template.git
+	branch = prod
+[submodule "apps/storefront"]
+	path = apps/storefront
+	url = https://github.com/chrislaai/medusa-storefront-starter-template.git
+	branch = prod
