@@ -5,9 +5,15 @@ tls:
 
 # http:
 #   routers:
-#     backend:
-#       rule: "Host(`app.example.com`)"
-#       service: backend
+#     api:
+#       rule: "Host(`api.example.com`)"
+#       service: api
+#       entryPoints:
+#         - websecure
+#       tls: true
+#     admin:
+#       rule: "Host(`admin.example.com`)"
+#       service: admin
 #       entryPoints:
 #         - websecure
 #       tls: true
@@ -19,10 +25,14 @@ tls:
 #       tls: true
 
 #   services:
-#     backend:
+#     api:
 #       loadBalancer:
 #         servers:
-#           - url: "http://<backend-service-ip-address>:<backend-service-port>"
+#           - url: "http://<api-service-ip-address>:<api-service-port>"
+#     admin:
+#       loadBalancer:
+#         servers:
+#           - url: "http://<admin-service-ip-address>:<admin-service-port>"
 #     storefront:
 #       loadBalancer:
 #         servers:
