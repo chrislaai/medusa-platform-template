@@ -1,8 +1,8 @@
-[submodule "apps/backend"]
-	path = apps/backend
-	url = https://github.com/chrislaai/medusa-starter-template.git
+[submodule "apps/api"]
+	path = apps/api
+	url = https://github.com/chrislaai/medusa-api-template.git
 	branch = prod
-[submodule "apps/storefront"]
-	path = apps/storefront
-	url = https://github.com/chrislaai/medusa-storefront-starter-template.git
+[submodule "apps/admin"]
+	path = apps/admin
+	url = https://github.com/chrislaai/medusa-admin-template.git
 	branch = prod
