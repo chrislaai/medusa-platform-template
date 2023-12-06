@@ -1,9 +1,9 @@
 version: "3.8"
 
 services:
-  backend:
+  api:
     build:
-      context: ./backend
+      context: ./api
       dockerfile: Dockerfile
     ports:
       - 9000:9000
@@ -11,11 +11,11 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik
-      - traefik.http.routers.backend.rule=Host(`${BACKEND_DOMAIN}`)
-      - traefik.http.routers.backend.entrypoints=websecure
-      - traefik.http.routers.backend.service=backend
-      - traefik.http.routers.backend.tls=true
-      - traefik.http.services.backend.loadbalancer.server.port=9000
+      - traefik.http.routers.api.rule=Host(`${API_DOMAIN}`)
+      - traefik.http.routers.api.entrypoints=websecure
+      - traefik.http.routers.api.service=api
+      - traefik.http.routers.api.tls=true
+      - traefik.http.services.api.loadbalancer.server.port=9000
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - REDIS_URL=${REDIS_URL}
@@ -39,10 +39,34 @@ services:
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
       - NODE_ENV=production
     volumes:
-      - backend:/app/backend
-      - /app/backend/node_modules
+      - api:/app/api
+      - /app/api/node_modules
     networks:
       - traefik
+      - medusa
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    ports:
+      - 7001:7001
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.admin.rule=Host(`${ADMIN_DOMAIN}`)
+      - traefik.http.routers.admin.entrypoints=websecure
+      - traefik.http.routers.admin.service=admin
+      - traefik.http.routers.admin.tls=true
+      - traefik.http.services.admin.loadbalancer.server.port=7001
+    environment:
+      - MEDUSA_BACKEND_URL=${MEDUSA_BACKEND_URL}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+    volumes:
+      - admin:/app/admin
+      - /app/admin/node_modules
+    networks:
       - medusa
 
   storefront:
@@ -86,7 +110,8 @@ services:
       - traefik
 
 volumes:
-  backend:
+  api:
+  admin:
   storefront:
 
 networks:
