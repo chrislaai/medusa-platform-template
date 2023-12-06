@@ -6,3 +6,7 @@
 	path = apps/admin
 	url = https://github.com/chrislaai/medusa-admin-template.git
 	branch = prod
+[submodule "apps/storefront"]
+	path = apps/storefront
+	url = https://github.com/chrislaai/medusa-storefront-template.git
+	branch = prod
